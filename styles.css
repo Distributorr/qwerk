@@ -1,60 +1,79 @@
-/* Grundlegendes Reset */
+/* Reset & Grundstile */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
-/* Body und Schrift */
 body {
   font-family: 'Roboto', sans-serif;
-  background: #f0f2f5;
+  background: #f7f9fc;
   color: #333;
   line-height: 1.6;
 }
 
-/* Header-Bereich */
+/* Header */
 header {
-  background: linear-gradient(135deg, #1d2671, #c33764);
+  background: linear-gradient(135deg, #283e51, #4b79a1);
   color: #fff;
   text-align: center;
   padding: 2rem 1rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 2.8rem;
+  margin-bottom: 0.3rem;
 }
 header p {
   font-size: 1.2rem;
 }
 
-/* Hauptlayout */
-main {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
+/* Tab-Navigation */
+#tabs {
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin: 1rem auto;
+  max-width: 800px;
+  border-radius: 8px;
+}
+.tab-link {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.tab-link:hover, .tab-link.active {
+  background: #e8eff5;
 }
 
-/* Section-Stil */
+/* Main Container */
+main {
+  max-width: 900px;
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+/* Allgemeine Section-Stile */
 section {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   padding: 1.5rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 1.5rem;
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
 }
-section:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+section.active {
+  display: block;
 }
-
-/* Überschriften */
 h2 {
   margin-bottom: 1rem;
-  color: #1d2671;
-  border-bottom: 2px solid #c33764;
+  color: #283e51;
+  border-bottom: 2px solid #4b79a1;
   padding-bottom: 0.3rem;
 }
 
@@ -73,10 +92,9 @@ textarea {
   resize: vertical;
 }
 
-/* Buttons */
+/* Buttons & Action-Row */
 button {
-  display: inline-block;
-  background: #c33764;
+  background: #4b79a1;
   color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -86,26 +104,23 @@ button {
   transition: background 0.3s ease;
 }
 button:hover {
-  background: #a22a55;
+  background: #3a6391;
 }
-
-/* Container für Verbindungsaktionen */
-.connection-actions {
+.action-row {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
-/* QR-Code Container */
+/* QR-Code */
 .qr-code {
-  margin: 1rem 0;
-  text-align: center;
+  margin: 1rem auto;
+  width: 120px;
+  height: 120px;
 }
 
 /* Statusanzeigen */
-#connectionStatus,
-#fileStatus,
-#locationStatus {
+.status {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: #555;
@@ -118,14 +133,14 @@ progress {
   margin-top: 1rem;
 }
 
-/* Chat-Bereich */
+/* Chat */
 #chatLog {
   height: 200px;
   overflow-y: auto;
   border: 1px solid #ddd;
   padding: 1rem;
   border-radius: 4px;
-  background: #fafafa;
+  background: #f0f4f8;
   margin-bottom: 1rem;
 }
 .chatMessage {
@@ -145,19 +160,17 @@ video {
   margin-top: 1rem;
 }
 
-/* Kompass */
+/* Kompass-Canvas */
 #compassCanvas {
   background: #fff;
-  border: 2px solid #1d2671;
+  border: 2px solid #283e51;
   border-radius: 50%;
   display: block;
   margin: 1rem auto;
 }
 
-/* Schritt-für-Schritt Anleitung */
-#anleitung ol {
-  padding-left: 1.5rem;
-}
-#anleitung li {
-  margin-bottom: 0.75rem;
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
