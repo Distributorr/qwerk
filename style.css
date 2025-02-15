@@ -5,107 +5,159 @@
   box-sizing: border-box;
 }
 
+/* Body und Schrift */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #eef2f5;
+  font-family: 'Roboto', sans-serif;
+  background: #f0f2f5;
   color: #333;
   line-height: 1.6;
-  padding-bottom: 2rem;
 }
 
+/* Header-Bereich */
 header {
-  background: linear-gradient(135deg, #4a90e2, #357ab8);
+  background: linear-gradient(135deg, #1d2671, #c33764);
   color: #fff;
-  padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 2rem 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-
 header h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
+header p {
+  font-size: 1.2rem;
+}
 
+/* Hauptlayout */
 main {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
 }
 
+/* Section-Stil */
 section {
   background: #fff;
-  padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 section:hover {
-  transform: scale(1.02);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
+/* Überschriften */
 h2 {
-  margin-bottom: 0.5rem;
-  border-bottom: 2px solid #4a90e2;
-  padding-bottom: 0.2rem;
+  margin-bottom: 1rem;
+  color: #1d2671;
+  border-bottom: 2px solid #c33764;
+  padding-bottom: 0.3rem;
 }
 
-textarea, input[type="text"] {
+/* Formular-Elemente */
+textarea,
+input[type="text"],
+input[type="file"] {
   width: 100%;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 1rem;
+}
+textarea {
+  resize: vertical;
 }
 
+/* Buttons */
 button {
-  background: #4a90e2;
+  display: inline-block;
+  background: #c33764;
   color: #fff;
   border: none;
-  padding: 0.5rem 1rem;
-  margin: 0.3rem 0;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
+  font-size: 1rem;
   cursor: pointer;
   transition: background 0.3s ease;
 }
-
 button:hover {
-  background: #357ab8;
+  background: #a22a55;
 }
 
-#chatLog {
-  height: 150px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  padding: 0.5rem;
-  border-radius: 4px;
-  background: #f9f9f9;
-  margin-bottom: 0.5rem;
+/* Container für Verbindungsaktionen */
+.connection-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
+/* QR-Code Container */
+.qr-code {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+/* Statusanzeigen */
+#connectionStatus,
+#fileStatus,
+#locationStatus {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Progress-Bar */
 progress {
   width: 100%;
-  height: 1.5rem;
-  margin-top: 0.5rem;
+  height: 20px;
+  margin-top: 1rem;
 }
 
+/* Chat-Bereich */
+#chatLog {
+  height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 4px;
+  background: #fafafa;
+  margin-bottom: 1rem;
+}
+.chatMessage {
+  margin-bottom: 0.75rem;
+}
+
+/* Video & Snapshot */
 video {
   width: 100%;
   border-radius: 4px;
   background: #000;
+  margin-bottom: 1rem;
 }
-
 #snapshotPreview img {
-  max-width: 100%;
-  margin-top: 0.5rem;
+  width: 100%;
   border-radius: 4px;
+  margin-top: 1rem;
 }
 
+/* Kompass */
 #compassCanvas {
-  background: #f9f9f9;
-  border: 2px solid #4a90e2;
+  background: #fff;
+  border: 2px solid #1d2671;
   border-radius: 50%;
   display: block;
   margin: 1rem auto;
+}
+
+/* Schritt-für-Schritt Anleitung */
+#anleitung ol {
+  padding-left: 1.5rem;
+}
+#anleitung li {
+  margin-bottom: 0.75rem;
 }
