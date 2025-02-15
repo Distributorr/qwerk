@@ -3,93 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Querk – Die multifunktionale P2P-Anwendung</title>
+  <title>Querk – Professionelle P2P-Anwendung</title>
   <!-- Moderne Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
-  <!-- QRCode.js (CDN) zur Generierung des QR-Codes -->
+  <!-- QRCode.js (für QR-Code Generierung) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
     <h1>Querk</h1>
-    <p>Verschlüsselt. Direkt. Modern.</p>
+    <p>Sicher. Direkt. Einfach.</p>
   </header>
+
+  <!-- Tab-Navigation -->
+  <nav id="tabs">
+    <button class="tab-link active" data-tab="connection">Verbindung</button>
+    <button class="tab-link" data-tab="fileTransfer">Dateien</button>
+    <button class="tab-link" data-tab="chat">Chat</button>
+    <button class="tab-link" data-tab="snapshot">Snapshot</button>
+    <button class="tab-link" data-tab="compassSection">Standort</button>
+    <button class="tab-link" data-tab="anleitung">Anleitung</button>
+  </nav>
+
   <main>
-    <!-- Verbindungsaufbau -->
-    <section id="connection">
+    <!-- Verbindung (Connection) -->
+    <section id="connection" class="tab-content active">
       <h2>Verbindungsaufbau</h2>
       <p>
-        Erstellen Sie ein Angebot und teilen Sie es mit Ihrem Peer – entweder über Copy &amp; Paste oder durch Scannen des QR-Codes.
+        Klicken Sie auf <strong>"Angebot generieren"</strong>, um ein Verbindungsangebot zu erstellen. 
+        Das Angebot wird im Textfeld angezeigt und zusätzlich als QR‑Code dargestellt – ideal zum einfachen Austausch.
       </p>
-      <div class="connection-actions">
-        <button id="createOffer">Angebot erstellen</button>
-        <button id="copyOffer">Angebot kopieren</button>
+      <div class="action-row">
+        <button id="createOffer">Angebot generieren</button>
+        <button id="copyOffer">Kopieren</button>
       </div>
       <textarea id="offer" placeholder="Ihr Angebot erscheint hier" readonly></textarea>
-      <!-- Container für den QR-Code -->
       <div id="qrCode" class="qr-code"></div>
-      <textarea id="answer" placeholder="Fügen Sie hier die Antwort Ihres Peers ein"></textarea>
+      <textarea id="answer" placeholder="Antwort Ihres Peers hier einfügen"></textarea>
       <button id="connect">Verbinden</button>
-      <div id="connectionStatus"></div>
+      <div id="connectionStatus" class="status"></div>
     </section>
 
     <!-- Dateiübertragung -->
-    <section id="fileTransfer">
+    <section id="fileTransfer" class="tab-content">
       <h2>Dateiübertragung</h2>
+      <p>Wählen Sie eine Datei und klicken Sie auf "Senden". Die Datei wird vor dem Transfer verschlüsselt.</p>
       <input type="file" id="fileInput">
       <button id="sendFile">Datei senden</button>
-      <div id="fileStatus"></div>
+      <div id="fileStatus" class="status"></div>
       <progress id="fileProgress" value="0" max="100"></progress>
     </section>
 
-    <!-- Chat-Funktion -->
-    <section id="chat">
+    <!-- Chat -->
+    <section id="chat" class="tab-content">
       <h2>Chat</h2>
+      <p>Senden Sie Nachrichten in Echtzeit.</p>
       <div id="chatLog"></div>
-      <input type="text" id="chatInput" placeholder="Ihre Nachricht...">
+      <input type="text" id="chatInput" placeholder="Nachricht eingeben">
       <button id="sendChat">Senden</button>
     </section>
 
     <!-- Snapshot (Webcam) -->
-    <section id="snapshot">
+    <section id="snapshot" class="tab-content">
       <h2>Snapshot</h2>
+      <p>Sehen Sie Ihren Live-Stream und nehmen Sie ein Bild auf.</p>
       <video id="videoPreview" autoplay playsinline></video>
       <button id="captureSnapshot">Snapshot aufnehmen</button>
       <div id="snapshotPreview"></div>
     </section>
 
-    <!-- Geolocation & Kompass -->
-    <section id="compassSection">
-      <h2>Kompass &amp; Standort</h2>
+    <!-- Standort & Kompass -->
+    <section id="compassSection" class="tab-content">
+      <h2>Standort &amp; Kompass</h2>
+      <p>Teilen Sie Ihren Standort und sehen Sie die Richtung zum Peer.</p>
       <button id="shareLocation">Standort teilen</button>
-      <div id="locationStatus"></div>
+      <div id="locationStatus" class="status"></div>
       <canvas id="compassCanvas" width="250" height="250"></canvas>
-      <p>Der Kompass zeigt die Richtung zum anderen Gerät.</p>
     </section>
 
     <!-- Schritt-für-Schritt Anleitung -->
-    <section id="anleitung">
+    <section id="anleitung" class="tab-content">
       <h2>Schritt-für-Schritt Anleitung</h2>
       <ol>
         <li>
-          <strong>Verbindung herstellen:</strong> Klicken Sie auf <em>"Angebot erstellen"</em>. Das generierte Angebot wird automatisch in ein QR‑Code umgewandelt und im vorgesehenen Bereich angezeigt. Teilen Sie das Angebot per Copy &amp; Paste oder durch Scannen des QR‑Codes mit Ihrem Peer. Sobald Sie dessen Antwort erhalten haben, fügen Sie diese in das entsprechende Feld ein und klicken Sie auf <em>"Verbinden"</em>.
+          <strong>Verbindung herstellen:</strong> Klicken Sie auf <em>"Angebot generieren"</em>. Ihr Angebot erscheint im Textfeld und als QR‑Code. Teilen Sie das Angebot (per Copy &amp; Paste oder QR‑Code) mit Ihrem Peer. Fügen Sie danach dessen Antwort in das untere Textfeld ein und klicken Sie auf <em>"Verbinden"</em>.
         </li>
         <li>
-          <strong>Dateiübertragung:</strong> Wählen Sie eine Datei aus und klicken Sie auf <em>"Datei senden"</em>. Die Datei wird vor dem Senden verschlüsselt und sicher übertragen.
+          <strong>Dateiübertragung:</strong> Wählen Sie eine Datei aus und klicken Sie auf <em>"Datei senden"</em>. Die Datei wird verschlüsselt übertragen.
         </li>
         <li>
-          <strong>Chat:</strong> Nutzen Sie den integrierten Chat, um in Echtzeit Nachrichten auszutauschen.
+          <strong>Chat:</strong> Nutzen Sie den Chat, um in Echtzeit Nachrichten auszutauschen.
         </li>
         <li>
-          <strong>Snapshot:</strong> Über den Live‑Stream Ihrer Webcam können Sie Snapshots aufnehmen und an Ihren Peer senden.
+          <strong>Snapshot:</strong> Nehmen Sie einen Snapshot Ihres Webcam-Streams auf und senden Sie ihn an Ihren Peer.
         </li>
         <li>
-          <strong>Standort &amp; Kompass:</strong> Teilen Sie Ihren Standort. Nach Austausch der Standortdaten berechnet der Kompass die relative Richtung zum Peer.
+          <strong>Standort &amp; Kompass:</strong> Teilen Sie Ihren Standort. Nach dem Austausch werden Sie die relative Richtung zum Peer erkennen.
         </li>
       </ol>
     </section>
   </main>
+  
   <script src="script.js"></script>
 </body>
 </html>
