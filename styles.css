@@ -34,7 +34,7 @@ header p {
   background: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   margin: 1rem auto;
-  max-width: 800px;
+  max-width: 900px;
   border-radius: 8px;
 }
 .tab-link {
@@ -57,8 +57,8 @@ main {
   padding: 0 1rem;
 }
 
-/* Allgemeine Section-Stile */
-section {
+/* Section-Stile */
+.tab-content {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -67,7 +67,7 @@ section {
   display: none;
   animation: fadeIn 0.3s ease-in-out;
 }
-section.active {
+.tab-content.active {
   display: block;
 }
 h2 {
@@ -78,9 +78,9 @@ h2 {
 }
 
 /* Formular-Elemente */
-textarea,
 input[type="text"],
-input[type="file"] {
+input[type="file"],
+textarea {
   width: 100%;
   padding: 0.75rem;
   margin-bottom: 1rem;
@@ -92,7 +92,7 @@ textarea {
   resize: vertical;
 }
 
-/* Buttons & Action-Row */
+/* Buttons & Action-Elemente */
 button {
   background: #4b79a1;
   color: #fff;
@@ -106,27 +106,30 @@ button {
 button:hover {
   background: #3a6391;
 }
-.action-row {
-  display: flex;
-  gap: 0.5rem;
+.user-info {
+  margin-bottom: 1rem;
+}
+.user-info label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+/* Map-Container (Responsive) */
+#map {
+  width: 100%;
+  height: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   margin-bottom: 1rem;
 }
 
-/* QR-Code */
-.qr-code {
-  margin: 1rem auto;
-  width: 120px;
-  height: 120px;
-}
-
-/* Statusanzeigen */
+/* Statusanzeigen & Progress */
 .status {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: #555;
 }
-
-/* Progress-Bar */
 progress {
   width: 100%;
   height: 20px;
@@ -160,17 +163,25 @@ video {
   margin-top: 1rem;
 }
 
-/* Kompass-Canvas */
-#compassCanvas {
-  background: #fff;
-  border: 2px solid #283e51;
-  border-radius: 50%;
-  display: block;
-  margin: 1rem auto;
-}
-
 /* Animation */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2.2rem;
+  }
+  #tabs {
+    flex-direction: column;
+  }
+  .tab-link {
+    text-align: center;
+    padding: 0.8rem;
+  }
+  #map {
+    height: 250px;
+  }
 }
