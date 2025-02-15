@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwerk – Die multifunktionale P2P-Anwendung</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Qwerk</h1>
+    <p>Verschlüsselt. Direkt. Modern.</p>
+  </header>
+  <main>
+    <!-- Verbindungsaufbau -->
+    <section id="connection">
+      <h2>Verbindungsaufbau</h2>
+      <p>Erstellen Sie ein Angebot und tauschen Sie dieses (z. B. per QR‑Code oder Copy &amp; Paste) mit Ihrem Peer aus.</p>
+      <button id="createOffer">Angebot erstellen</button>
+      <textarea id="offer" placeholder="Ihr Angebot erscheint hier"></textarea>
+      <textarea id="answer" placeholder="Fügen Sie hier die Antwort Ihres Peers ein"></textarea>
+      <button id="connect">Verbinden</button>
+      <div id="connectionStatus"></div>
+    </section>
+
+    <!-- Dateiübertragung -->
+    <section id="fileTransfer">
+      <h2>Dateiübertragung</h2>
+      <input type="file" id="fileInput" />
+      <button id="sendFile">Datei senden</button>
+      <div id="fileStatus"></div>
+      <progress id="fileProgress" value="0" max="100"></progress>
+    </section>
+
+    <!-- Chat-Funktion -->
+    <section id="chat">
+      <h2>Chat</h2>
+      <div id="chatLog"></div>
+      <input type="text" id="chatInput" placeholder="Ihre Nachricht..."/>
+      <button id="sendChat">Senden</button>
+    </section>
+
+    <!-- Snapshot (Webcam) -->
+    <section id="snapshot">
+      <h2>Snapshot</h2>
+      <video id="videoPreview" autoplay playsinline></video>
+      <button id="captureSnapshot">Snapshot aufnehmen</button>
+      <div id="snapshotPreview"></div>
+    </section>
+
+    <!-- Geolocation & Kompass -->
+    <section id="compassSection">
+      <h2>Kompass &amp; Standort</h2>
+      <button id="shareLocation">Standort teilen</button>
+      <div id="locationStatus"></div>
+      <canvas id="compassCanvas" width="250" height="250"></canvas>
+      <p>Der Kompass zeigt die Richtung zum anderen Gerät.</p>
+    </section>
+
+    <!-- Weitere Funktionen -->
+    <section id="extraFunctions">
+      <h2>Weitere Funktionen</h2>
+      <p>Platz für weitere, innovative Features.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
