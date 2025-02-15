@@ -1,36 +1,36 @@
 'use strict';
 
-/* ============================ */
-/* Konfiguration & Globale Variablen */
-/* ============================ */
-
-// WebRTC-Konfiguration mit STUN-Server
+/* ============================
+   Konfiguration & Globale Variablen
+   ============================ */
 const configuration = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
 
 let localConnection = new RTCPeerConnection(configuration);
-let dataChannel; // Wird für alle Daten (Dateien, Chat, Standort, Snapshot) genutzt
+let dataChannel; // Gemeinsamer Kanal für alle Nachrichten
 
 // UI-Elemente
 const createOfferBtn   = document.getElementById('createOffer');
+const copyOfferBtn     = document.getElementById('copyOffer');
 const connectBtn       = document.getElementById('connect');
 const offerTextArea    = document.getElementById('offer');
 const answerTextArea   = document.getElementById('answer');
 const connectionStatus = document.getElementById('connectionStatus');
+const qrCodeContainer  = document.getElementById('qrCode');
 
 const fileInput    = document.getElementById('fileInput');
 const sendFileBtn  = document.getElementById('sendFile');
 const fileStatus   = document.getElementById('fileStatus');
 const fileProgress = document.getElementById('fileProgress');
 
-const chatLog    = document.getElementById('chatLog');
-const chatInput  = document.getElementById('chatInput');
-const sendChatBtn = document.getElementById('sendChat');
+const chatLog      = document.getElementById('chatLog');
+const chatInput    = document.getElementById('chatInput');
+const sendChatBtn  = document.getElementById('sendChat');
 
-const videoPreview     = document.getElementById('videoPreview');
-const captureSnapshot  = document.getElementById('captureSnapshot');
-const snapshotPreview  = document.getElementById('snapshotPreview');
+const videoPreview    = document.getElementById('videoPreview');
+const captureSnapshot = document.getElementById('captureSnapshot');
+const snapshotPreview = document.getElementById('snapshotPreview');
 
 const shareLocationBtn = document.getElementById('shareLocation');
 const locationStatus   = document.getElementById('locationStatus');
@@ -38,16 +38,15 @@ const locationStatus   = document.getElementById('locationStatus');
 const compassCanvas = document.getElementById('compassCanvas');
 const ctx           = compassCanvas.getContext('2d');
 
-// Für Geolokalisierung
 let localLocation  = null;  // { lat: ..., lon: ... }
 let remoteLocation = null;  // { lat: ..., lon: ... }
-let deviceOrientation = 0;  // Falls verfügbar
+let deviceOrientation = 0;  // falls verfügbar
 
-/* ============================ */
-/* Hilfsfunktionen: Base64-Konvertierung, Verschlüsselung & Entschlüsselung */
-/* ============================ */
-
-// Konvertiert ArrayBuffer in Base64
+/* ============================
+   Hilfsfunktionen: Base64, Verschlüsselung & Entschlüsselung
+   ============================
+   (Die folgenden Funktionen ermöglichen es, Daten zu verschlüsseln und zu konvertieren.)
+*/
 function arrayBufferToBase64(buffer) {
   let binary = '';
   const bytes = new Uint8Array(buffer);
@@ -57,21 +56,18 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-// Konvertiert Base64 in ArrayBuffer
 function base64ToArrayBuffer(base64) {
-  const binary_string = window.atob(base64);
-  const len = binary_string.length;
+  const binaryString = window.atob(base64);
+  const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i);
+    bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes.buffer;
 }
 
-// Statischer Passphrasenschlüssel (nur für Demonstrationszwecke!)
-const passphrase = 'passwort123';
+const passphrase = 'passwort123'; // Nur zu Demonstrationszwecken!
 
-// Verschlüsselt gegebene Daten (ArrayBuffer) mittels AES-GCM und gibt ein ArrayBuffer zurück (IV vorangestellt)
 async function encryptData(data) {
   const keyMaterial = new TextEncoder().encode(passphrase);
   const key = await crypto.subtle.importKey(
@@ -87,14 +83,12 @@ async function encryptData(data) {
     key,
     data
   );
-  // Kombinieren: IV + verschlüsselte Daten
   const combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
   combined.set(iv, 0);
   combined.set(new Uint8Array(encrypted), iv.byteLength);
   return combined.buffer;
 }
 
-// Entschlüsselt Daten (ArrayBuffer, IV vorne angehängt) mittels AES-GCM
 async function decryptData(encryptedData) {
   const keyMaterial = new TextEncoder().encode(passphrase);
   const key = await crypto.subtle.importKey(
@@ -107,18 +101,14 @@ async function decryptData(encryptedData) {
   const data = new Uint8Array(encryptedData);
   const iv = data.slice(0, 12);
   const ciphertext = data.slice(12);
-  return crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: iv },
-    key,
-    ciphertext
-  );
+  return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
 }
 
-/* ============================ */
-/* WebRTC & DataChannel Einrichtung */
-/* ============================ */
-
-// Funktion zur Einrichtung des DataChannels
+/* ============================
+   WebRTC & DataChannel Einrichtung
+   ============================
+   Hier wird der DataChannel erstellt und konfiguriert – dies erfolgt entweder lokal oder remote.
+*/
 function setupDataChannel() {
   dataChannel = localConnection.createDataChannel("querkChannel");
   dataChannel.onopen = () => {
@@ -133,22 +123,19 @@ function setupDataChannel() {
     console.error('DataChannel Fehler:', err);
   };
   dataChannel.onmessage = async (event) => {
-    // Falls die Nachricht als String übermittelt wird, interpretieren wir sie als JSON
     if (typeof event.data === "string") {
       try {
         const msg = JSON.parse(event.data);
         await handleMessage(msg);
       } catch (err) {
-        console.error('Fehler beim Parsen der JSON-Nachricht:', err);
+        console.error('JSON-Fehler:', err);
       }
     } else {
-      // Sollte hier Binärdaten ankommen – im vorliegenden Protokoll senden wir alle komplexen Inhalte als JSON (Base64‑codiert)
-      console.warn("Unerwarteter Binärdatentyp empfangen.");
+      console.warn("Unbekannter Datentyp empfangen.");
     }
   };
 }
 
-// Falls der Peer den DataChannel initiiert
 localConnection.ondatachannel = (event) => {
   dataChannel = event.channel;
   dataChannel.onopen = () => {
@@ -161,34 +148,50 @@ localConnection.ondatachannel = (event) => {
         const msg = JSON.parse(event.data);
         await handleMessage(msg);
       } catch (err) {
-        console.error('Fehler beim Parsen der Nachricht:', err);
+        console.error('JSON-Fehler:', err);
       }
     }
   };
 };
 
-// ICE-Kandidaten austauschen (hier manuell über die Textfelder)
 localConnection.onicecandidate = (event) => {
   if (event.candidate === null) {
     console.log("ICE-Gathering abgeschlossen.");
-    // Sobald ICE abgeschlossen ist, wird das Angebot im Textfeld angezeigt
     offerTextArea.value = JSON.stringify(localConnection.localDescription);
+    generateQRCode(offerTextArea.value);
   }
 };
 
-/* ============================ */
-/* Message-Handler für den DataChannel */
-/* ============================ */
+/* ============================
+   QR-Code Generierung
+   ============================
+   Mit Hilfe der eingebundenen QRCode.js wird aus dem Angebot ein QR-Code erstellt.
+*/
+function generateQRCode(text) {
+  // Leeren des Containers
+  qrCodeContainer.innerHTML = "";
+  // Erzeugen des QR-Codes
+  new QRCode(qrCodeContainer, {
+    text: text,
+    width: 180,
+    height: 180,
+    colorDark : "#1d2671",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+}
 
+/* ============================
+   Message-Handler
+   ============================
+   Die Funktion verarbeitet alle Nachrichten (Chat, Datei, Snapshot, Standort) vom Peer.
+*/
 async function handleMessage(msg) {
   switch (msg.type) {
-
     case "chat":
       appendChatMessage("Peer", msg.message, msg.timestamp);
       break;
-
     case "file":
-      // Empfangen einer Datei: Wir entschlüsseln und bieten zum Download an
       fileStatus.textContent = `Datei "${msg.filename}" empfangen (${msg.size} Bytes). Entschlüsselung läuft...`;
       try {
         const encryptedBuffer = base64ToArrayBuffer(msg.data);
@@ -197,48 +200,51 @@ async function handleMessage(msg) {
         const url = URL.createObjectURL(blob);
         fileStatus.innerHTML = `Datei "${msg.filename}" empfangen. <a href="${url}" download="${msg.filename}">Herunterladen</a>`;
       } catch (err) {
-        console.error("Fehler bei der Entschlüsselung der Datei:", err);
+        console.error("Entschlüsselungsfehler:", err);
         fileStatus.textContent = "Fehler bei der Entschlüsselung der Datei.";
       }
       break;
-
     case "snapshot":
-      // Empfangen eines Snapshots (als Base64-String)
       const img = document.createElement('img');
       img.src = msg.data;
       snapshotPreview.innerHTML = "";
       snapshotPreview.appendChild(img);
       break;
-
     case "location":
-      // Empfangen von Standortdaten des Peers
       remoteLocation = { lat: msg.lat, lon: msg.lon };
-      locationStatus.textContent = `Peer Standort empfangen: Lat ${msg.lat.toFixed(4)}, Lon ${msg.lon.toFixed(4)}`;
+      locationStatus.textContent = `Peer Standort: Lat ${msg.lat.toFixed(4)}, Lon ${msg.lon.toFixed(4)}`;
       updateCompass();
       break;
-
     default:
       console.warn("Unbekannter Nachrichtentyp:", msg.type);
   }
 }
 
-/* ============================ */
-/* UI-Interaktionen & Event-Listener */
-/* ============================ */
-
-// Erzeugen eines Angebots (Offer)
+/* ============================
+   UI-Interaktionen & Event-Listener
+   ============================
+   Hier erfolgt die Interaktion mit der Benutzeroberfläche.
+*/
+// Angebot erstellen
 createOfferBtn.addEventListener('click', async () => {
   setupDataChannel();
   try {
     const offer = await localConnection.createOffer();
     await localConnection.setLocalDescription(offer);
-    // Sobald ICE-Gathering abgeschlossen ist, erscheint das Angebot im Textfeld
+    // Das Angebot wird über ICE automatisch in das Textfeld geschrieben.
   } catch (err) {
     console.error("Fehler beim Erstellen des Angebots:", err);
   }
 });
 
-// Setzen der Remote Description anhand der Antwort
+// Angebot kopieren (zum einfachen Austausch)
+copyOfferBtn.addEventListener('click', () => {
+  offerTextArea.select();
+  document.execCommand('copy');
+  alert('Angebot wurde in die Zwischenablage kopiert.');
+});
+
+// Verbindung herstellen
 connectBtn.addEventListener('click', async () => {
   try {
     const answer = JSON.parse(answerTextArea.value);
@@ -249,21 +255,20 @@ connectBtn.addEventListener('click', async () => {
   }
 });
 
-// Dateiübertragung (inkl. Verschlüsselung und Base64-Codierung)
+// Datei senden
 sendFileBtn.addEventListener('click', async () => {
   const file = fileInput.files[0];
   if (!file) {
     alert("Bitte wählen Sie eine Datei aus!");
     return;
   }
-  fileStatus.textContent = `Datei "${file.name}" wird gelesen...`;
+  fileStatus.textContent = `Lese Datei "${file.name}"...`;
   const reader = new FileReader();
   reader.onload = async () => {
     try {
       const arrayBuffer = reader.result;
       const encryptedBuffer = await encryptData(arrayBuffer);
       const base64Data = arrayBufferToBase64(encryptedBuffer);
-      // Senden als JSON-Nachricht
       const msg = {
         type: "file",
         filename: file.name,
@@ -274,14 +279,14 @@ sendFileBtn.addEventListener('click', async () => {
       fileStatus.textContent = `Datei "${file.name}" gesendet.`;
       fileProgress.value = 100;
     } catch (err) {
-      console.error("Fehler bei der Datei-Verschlüsselung:", err);
+      console.error("Fehler bei der Verschlüsselung:", err);
       fileStatus.textContent = "Fehler beim Verschlüsseln der Datei.";
     }
   };
   reader.readAsArrayBuffer(file);
 });
 
-// Chat-Funktionalität
+// Chat senden
 sendChatBtn.addEventListener('click', () => {
   const message = chatInput.value.trim();
   if (!message) return;
@@ -300,13 +305,13 @@ function appendChatMessage(sender, message, timestamp) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// Webcam-Snapshot: Video-Stream starten und Snapshot aufnehmen
+// Webcam starten und Snapshot aufnehmen
 async function startVideoStream() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
     videoPreview.srcObject = stream;
   } catch (err) {
-    console.error("Fehler beim Zugriff auf die Webcam:", err);
+    console.error("Webcam-Fehler:", err);
   }
 }
 startVideoStream();
@@ -317,22 +322,19 @@ captureSnapshot.addEventListener('click', async () => {
   snapshotCanvas.height = videoPreview.videoHeight;
   const snapCtx = snapshotCanvas.getContext('2d');
   snapCtx.drawImage(videoPreview, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
-  // Erzeugt einen DataURL (Base64)
   const dataURL = snapshotCanvas.toDataURL("image/png");
-  // Senden als Snapshot-Nachricht
   const msg = { type: "snapshot", data: dataURL };
   dataChannel.send(JSON.stringify(msg));
-  // Anzeige des lokalen Snapshots
   snapshotPreview.innerHTML = "";
   const img = document.createElement('img');
   img.src = dataURL;
   snapshotPreview.appendChild(img);
 });
 
-// Standort teilen: Geolocation API nutzen und Standortdaten versenden
+// Standort teilen
 shareLocationBtn.addEventListener('click', () => {
   if (!navigator.geolocation) {
-    locationStatus.textContent = "Geolocation wird von Ihrem Browser nicht unterstützt.";
+    locationStatus.textContent = "Geolocation wird nicht unterstützt.";
     return;
   }
   navigator.geolocation.getCurrentPosition((position) => {
@@ -341,21 +343,20 @@ shareLocationBtn.addEventListener('click', () => {
       lon: position.coords.longitude
     };
     locationStatus.textContent = `Ihr Standort: Lat ${localLocation.lat.toFixed(4)}, Lon ${localLocation.lon.toFixed(4)}`;
-    // Senden der Standortdaten an den Peer
     const msg = { type: "location", lat: localLocation.lat, lon: localLocation.lon };
     dataChannel.send(JSON.stringify(msg));
     updateCompass();
   }, (err) => {
-    console.error("Fehler beim Ermitteln des Standorts:", err);
+    console.error("Standortfehler:", err);
     locationStatus.textContent = "Fehler beim Ermitteln des Standorts.";
   });
 });
 
-/* ============================ */
-/* Kompass-Funktionalität inkl. Berechnung des Richtungsvektors */
-/* ============================ */
-
-// Berechnet den Kurs (in Grad) zwischen zwei geographischen Punkten
+/* ============================
+   Kompass-Funktionalität
+   ============================
+   Die folgenden Funktionen berechnen anhand der Standortdaten den relativen Kurs und zeichnen einen dynamischen Kompass.
+*/
 function calculateBearing(lat1, lon1, lat2, lon2) {
   const toRad = Math.PI / 180;
   const dLon = (lon2 - lon1) * toRad;
@@ -366,7 +367,6 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
   return (brng + 360) % 360;
 }
 
-// Zeichnet den Kompass auf dem Canvas
 function drawCompass(angle = 0) {
   const width = compassCanvas.width;
   const height = compassCanvas.height;
@@ -377,7 +377,7 @@ function drawCompass(angle = 0) {
   // Äußerer Kreis
   ctx.beginPath();
   ctx.arc(centerX, centerY, 110, 0, 2 * Math.PI);
-  ctx.strokeStyle = '#4a90e2';
+  ctx.strokeStyle = '#1d2671';
   ctx.lineWidth = 3;
   ctx.stroke();
 
@@ -395,35 +395,28 @@ function drawCompass(angle = 0) {
   ctx.restore();
 
   // Norden-Kennzeichnung
-  ctx.font = '16px sans-serif';
+  ctx.font = '16px Roboto, sans-serif';
   ctx.fillStyle = '#333';
   ctx.fillText('N', centerX - 6, centerY - 90);
 }
 
-// Aktualisiert den Kompass: Falls beide Standorte vorliegen, wird der relative Kurs berechnet
 function updateCompass() {
   let angle = 0;
   if (localLocation && remoteLocation) {
     const bearing = calculateBearing(localLocation.lat, localLocation.lon, remoteLocation.lat, remoteLocation.lon);
-    // Falls DeviceOrientation vorliegt, kann der reale Kompasskurs ermittelt werden
     angle = (bearing - deviceOrientation) * Math.PI / 180;
   } else {
-    // Andernfalls simulieren wir eine Rotation
     angle = Date.now() / 3000;
   }
   drawCompass(angle);
 }
 
-// Aktualisierung des Kompasses in regelmäßigen Abständen
 setInterval(updateCompass, 100);
 
-/* ============================ */
-/* DeviceOrientationEvent: Aktualisierung des Gerätedrehwinkels */
-/* ============================ */
 if (window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', (event) => {
     if (event.alpha !== null) {
-      deviceOrientation = event.alpha; // alpha in Grad
+      deviceOrientation = event.alpha;
       updateCompass();
     }
   }, true);
