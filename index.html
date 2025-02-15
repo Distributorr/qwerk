@@ -4,11 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Querk – Professionelle P2P-Anwendung</title>
-  <!-- Moderne Google Fonts -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
-  <!-- QRCode.js (für QR-Code Generierung) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Leaflet CSS für die Karte -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Eigene Styles -->
   <link rel="stylesheet" href="styles.css">
+  <!-- Firebase (Compat-Version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- QRCode.js (für optionale QR-Code Darstellung, falls gewünscht) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
   <header>
@@ -22,26 +30,21 @@
     <button class="tab-link" data-tab="fileTransfer">Dateien</button>
     <button class="tab-link" data-tab="chat">Chat</button>
     <button class="tab-link" data-tab="snapshot">Snapshot</button>
-    <button class="tab-link" data-tab="compassSection">Standort</button>
     <button class="tab-link" data-tab="anleitung">Anleitung</button>
   </nav>
 
   <main>
-    <!-- Verbindung (Connection) -->
+    <!-- Verbindung / Präsenz (automatische Anzeige der Benutzer) -->
     <section id="connection" class="tab-content active">
-      <h2>Verbindungsaufbau</h2>
-      <p>
-        Klicken Sie auf <strong>"Angebot generieren"</strong>, um ein Verbindungsangebot zu erstellen. 
-        Das Angebot wird im Textfeld angezeigt und zusätzlich als QR‑Code dargestellt – ideal zum einfachen Austausch.
-      </p>
-      <div class="action-row">
-        <button id="createOffer">Angebot generieren</button>
-        <button id="copyOffer">Kopieren</button>
+      <h2>Ihre Präsenz</h2>
+      <p>Erlauben Sie den Zugriff auf Ihre Standortdaten – so werden Sie automatisch für andere sichtbar.  
+         Ihr zufällig generierter Name kann bei Bedarf geändert werden.</p>
+      <div class="user-info">
+        <label for="userName">Ihr Name:</label>
+        <input type="text" id="userName" placeholder="Ihr Name" />
       </div>
-      <textarea id="offer" placeholder="Ihr Angebot erscheint hier" readonly></textarea>
-      <div id="qrCode" class="qr-code"></div>
-      <textarea id="answer" placeholder="Antwort Ihres Peers hier einfügen"></textarea>
-      <button id="connect">Verbinden</button>
+      <!-- Container für die interaktive Karte -->
+      <div id="map"></div>
       <div id="connectionStatus" class="status"></div>
     </section>
 
@@ -58,7 +61,7 @@
     <!-- Chat -->
     <section id="chat" class="tab-content">
       <h2>Chat</h2>
-      <p>Senden Sie Nachrichten in Echtzeit.</p>
+      <p>Nutzen Sie den Chat, um in Echtzeit Nachrichten auszutauschen.</p>
       <div id="chatLog"></div>
       <input type="text" id="chatInput" placeholder="Nachricht eingeben">
       <button id="sendChat">Senden</button>
@@ -67,19 +70,10 @@
     <!-- Snapshot (Webcam) -->
     <section id="snapshot" class="tab-content">
       <h2>Snapshot</h2>
-      <p>Sehen Sie Ihren Live-Stream und nehmen Sie ein Bild auf.</p>
+      <p>Sehen Sie Ihren Live-Stream und nehmen Sie einen Snapshot auf.</p>
       <video id="videoPreview" autoplay playsinline></video>
       <button id="captureSnapshot">Snapshot aufnehmen</button>
       <div id="snapshotPreview"></div>
-    </section>
-
-    <!-- Standort & Kompass -->
-    <section id="compassSection" class="tab-content">
-      <h2>Standort &amp; Kompass</h2>
-      <p>Teilen Sie Ihren Standort und sehen Sie die Richtung zum Peer.</p>
-      <button id="shareLocation">Standort teilen</button>
-      <div id="locationStatus" class="status"></div>
-      <canvas id="compassCanvas" width="250" height="250"></canvas>
     </section>
 
     <!-- Schritt-für-Schritt Anleitung -->
@@ -87,24 +81,22 @@
       <h2>Schritt-für-Schritt Anleitung</h2>
       <ol>
         <li>
-          <strong>Verbindung herstellen:</strong> Klicken Sie auf <em>"Angebot generieren"</em>. Ihr Angebot erscheint im Textfeld und als QR‑Code. Teilen Sie das Angebot (per Copy &amp; Paste oder QR‑Code) mit Ihrem Peer. Fügen Sie danach dessen Antwort in das untere Textfeld ein und klicken Sie auf <em>"Verbinden"</em>.
+          <strong>Präsenz herstellen:</strong> Erlauben Sie den Zugriff auf Ihre Standortdaten. Sie werden dann automatisch auf der interaktiven Karte angezeigt – Ihr Name wird zufällig generiert und kann bei Bedarf angepasst werden.
         </li>
         <li>
-          <strong>Dateiübertragung:</strong> Wählen Sie eine Datei aus und klicken Sie auf <em>"Datei senden"</em>. Die Datei wird verschlüsselt übertragen.
+          <strong>Dateiübertragung:</strong> Wählen Sie eine Datei aus und senden Sie sie. Ihre Datei wird vor der Übertragung verschlüsselt.
         </li>
         <li>
-          <strong>Chat:</strong> Nutzen Sie den Chat, um in Echtzeit Nachrichten auszutauschen.
+          <strong>Chat:</strong> Schreiben Sie Nachrichten in das Chat-Feld und kommunizieren Sie in Echtzeit.
         </li>
         <li>
-          <strong>Snapshot:</strong> Nehmen Sie einen Snapshot Ihres Webcam-Streams auf und senden Sie ihn an Ihren Peer.
-        </li>
-        <li>
-          <strong>Standort &amp; Kompass:</strong> Teilen Sie Ihren Standort. Nach dem Austausch werden Sie die relative Richtung zum Peer erkennen.
+          <strong>Snapshot:</strong> Nehmen Sie einen Schnappschuss Ihres Webcam-Streams auf und senden Sie ihn.
         </li>
       </ol>
     </section>
   </main>
-  
+
+  <!-- Eigene Skriptdatei -->
   <script src="script.js"></script>
 </body>
 </html>
